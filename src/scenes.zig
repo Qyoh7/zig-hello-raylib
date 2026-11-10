@@ -138,7 +138,7 @@ pub const Gameplay = struct {
         self.ball.pos.x += self.ball.vel.x * dt;
         self.ball.pos.y += self.ball.vel.y * dt;
 
-        // check for collision
+        // check for collision with walls
         if (getBallBoundingRec(self).topEdge <= 0)
         {
             self.ball.pos.y = @floatFromInt(self.ball.radius);
@@ -155,18 +155,21 @@ pub const Gameplay = struct {
             self.* = Gameplay.init();
             return;
         }
-
         if (getBallBoundingRec(self).leftEdge <= 0)
         {
             self.ball.pos.x = @floatFromInt(self.ball.radius);
             self.ball.vel.x = -self.ball.vel.x;
         }
+
+        // check for collision with ball and paddle
         if (getBallBoundingRec(self).bottomEdge >= self.paddle.pos.y and
             inRange(self.ball.pos.x, self.paddle.pos.x, self.paddle.pos.x + self.paddle.size.x))
         {
             self.ball.pos.y = self.paddle.pos.y - @as(f32, @floatFromInt(self.ball.radius));
             self.ball.vel.y = -self.ball.vel.y;
         }
+
+        // check for collision with paddle and walls
         if (getPaddleBoundingRec(self).leftEdge <= 0)
         {
             self.paddle.pos.x = 0;
