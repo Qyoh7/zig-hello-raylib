@@ -33,6 +33,10 @@ pub fn main() !void {
             .gameplay => {
                 breakout.gameplay.update(&breakout.state);
                 breakout.gameplay.draw();
+            },
+            .gameover => {
+                scenes.GameOverMenu.update(&breakout.state);
+                scenes.GameOverMenu.draw();
             }
         }
         rl.clearBackground(colors.backgroundColor);

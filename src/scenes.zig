@@ -4,7 +4,7 @@ const colors = @import("colors.zig");
 const entities = @import("entities.zig");
 
 pub const State = enum {
-    menu, gameplay
+    menu, gameplay, gameover
 };
 
 const BoundingRec = struct {
@@ -17,6 +17,7 @@ const BoundingRec = struct {
 pub const Game = struct {
     gameplay: Gameplay,
     menu: Menu = .{},
+    gameOverMenu: GameOverMenu = .{},
     state: State = .menu,
 
     pub fn init() Game
@@ -128,7 +129,6 @@ pub const Gameplay = struct {
 
     pub fn update(self: *Gameplay, state: *State) void
     {
-        _ = state;
         const dt = rl.getFrameTime();
 
         // update physics
@@ -151,9 +151,11 @@ pub const Gameplay = struct {
         }
         if (getBallBoundingRec(self).bottomEdge >= @as(f32, @floatFromInt(rl.getScreenHeight())))
         {
-            self.ball.pos.y = @floatFromInt(rl.getScreenHeight() - self.ball.radius);
-            self.ball.vel.y = -self.ball.vel.y;
+            state.* = .gameover;
+            self.* = Gameplay.init();
+            return;
         }
+
         if (getBallBoundingRec(self).leftEdge <= 0)
         {
             self.ball.pos.x = @floatFromInt(self.ball.radius);
@@ -205,6 +207,27 @@ pub const Menu = struct {
         const textColor = colors.ballColor;
         rl.drawText(text, textX, textY, fontSize, textColor);
     }
+    pub fn update(state: *State) void {
+        if (rl.isKeyDown(.enter)) {
+            state.* = .gameplay;
+        }
+    }
+};
+
+pub const GameOverMenu = struct {
+    pub fn draw() void
+    {
+        const gameOverText = "Game Over!";
+        const text = "Press Enter to play again";
+
+        const textX = @divTrunc(rl.getScreenWidth(), 2) - @divTrunc(rl.measureText(text, 20), 2);
+        const textY = @divTrunc(rl.getScreenHeight(), 2);
+        const fontSize = 20;
+        const textColor = colors.ballColor;
+        rl.drawText(text, textX, textY, fontSize, textColor);
+        rl.drawText(gameOverText, textX, textY - 40, fontSize, .red);
+    }
+
     pub fn update(state: *State) void {
         if (rl.isKeyDown(.enter)) {
             state.* = .gameplay;
