@@ -105,6 +105,16 @@ pub const Gameplay = struct {
         };
     }
 
+    fn getPaddleBoundingRec(self: *Gameplay) BoundingRec
+    {
+        return BoundingRec {
+            .topEdge = self.paddle.pos.y,
+            .rightEdge = self.paddle.pos.x + self.paddle.size.x,
+            .bottomEdge = self.paddle.pos.y + self.paddle.size.y,
+            .leftEdge = self.paddle.pos.x,
+        };
+    }
+
     fn inRange(value: anytype, min: anytype, max: anytype) bool
     {
         if (@TypeOf(value) == @TypeOf(min) and 
@@ -154,6 +164,14 @@ pub const Gameplay = struct {
         {
             self.ball.pos.y = self.paddle.pos.y - @as(f32, @floatFromInt(self.ball.radius));
             self.ball.vel.y = -self.ball.vel.y;
+        }
+        if (getPaddleBoundingRec(self).leftEdge <= 0)
+        {
+            self.paddle.pos.x = 0;
+        }
+        if (getPaddleBoundingRec(self).rightEdge >= @as(f32, @floatFromInt(rl.getScreenWidth())))
+        {
+            self.paddle.pos.x = @as(f32, @floatFromInt(rl.getScreenWidth())) - self.paddle.size.x;
         }
 
         // check for input
